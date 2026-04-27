@@ -238,6 +238,102 @@
     .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .info-box { padding: 16px; border-radius: 18px; background: #fff; border: 1px solid var(--line); line-height: 1.65; color: #334155; font-size: 14px; }
     .info-box strong { display: block; margin-bottom: 8px; color: #111827; font-size: 15px; }
+
+    .admission-box {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid var(--line);
+    }
+    .admission-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .admission-head strong { font-size: 15px; letter-spacing: -0.02em; }
+    .department-select {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid #d9e2ef;
+      border-radius: 13px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      font-weight: 800;
+    }
+    .admission-result {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    .admission-result .topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .admission-result .title { font-size: 13px; color: var(--muted); font-weight: 900; }
+    .admission-result .result-text { margin-top: 5px; font-size: 23px; font-weight: 950; letter-spacing: -0.04em; }
+    .admission-message { color: #334155; line-height: 1.55; font-size: 13px; font-weight: 700; }
+    .chance-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+    .chance-empty { color: #64748b; background: #f1f5f9; }
+    .chance-safe { color: #15803d; background: var(--green-soft); }
+    .chance-competitive { color: #1d4ed8; background: var(--primary-soft); }
+    .chance-challenge { color: #a16207; background: var(--amber-soft); }
+    .chance-risk { color: #b91c1c; background: var(--red-soft); }
+    .target-meter { display: grid; gap: 7px; }
+    .target-meter-track { position: relative; height: 12px; border-radius: 999px; overflow: hidden; border: 1px solid #e2e8f0; background: #edf2f7; }
+    .target-meter-fill { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e); transition: width .25s ease; }
+    .target-meter-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: 11.5px; font-weight: 800; }
+    .chance-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .chance-card {
+      position: relative;
+      display: grid;
+      gap: 11px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    }
+    .chance-card:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(15, 23, 42, .08); }
+    .chance-card.selected { border-color: rgba(37, 99, 235, .45); box-shadow: 0 12px 30px rgba(37,99,235,.10); }
+    .chance-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+      background: #e2e8f0;
+    }
+    .chance-card.safe::before { background: var(--green); }
+    .chance-card.competitive::before { background: var(--primary); }
+    .chance-card.challenge::before { background: var(--amber); }
+    .chance-card.risk::before { background: var(--red); }
+    .chance-card.empty::before { background: #cbd5e1; }
+    .chance-card .dept { font-weight: 950; letter-spacing: -0.02em; }
+    .chance-card .target { color: var(--muted); font-size: 12.5px; line-height: 1.5; font-weight: 800; }
+    .chance-card .gap { font-size: 19px; font-weight: 950; letter-spacing: -0.03em; }
+    .standard-table { min-width: 760px; }
+    .standard-note {
+      margin-top: 12px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      color: #475569;
+      line-height: 1.65;
+      font-size: 13px;
+      font-weight: 700;
+    }
     .footer-note { margin-top: 16px; color: var(--muted); font-size: 13px; line-height: 1.7; }
     .toast {
       position: fixed;
@@ -261,6 +357,7 @@
       .hero { grid-template-columns: 1fr; }
       .semester-grid { grid-template-columns: 1fr; }
       .info-grid { grid-template-columns: 1fr; }
+      .chance-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 640px) {
       .app { width: min(100% - 20px, 1220px); padding-top: 18px; }
@@ -271,6 +368,7 @@
       .btn { flex: 1; }
       .score-big .value { font-size: 32px; }
       .metric-grid { grid-template-columns: 1fr; }
+      .chance-grid { grid-template-columns: 1fr; }
     }
     @media print {
       body { background: #fff; }
@@ -311,6 +409,32 @@
           <div class="metric"><div class="k">총 만점</div><div class="v">120점</div></div>
           <div class="metric"><div class="k">완료 학기</div><div class="v"><span id="completeSemesters">0</span> / 5</div></div>
         </div>
+        <div class="admission-box" aria-label="지원 학과별 안정권 판단">
+          <div class="admission-head">
+            <strong>지원 학과 안정권</strong>
+            <span class="muted" style="font-size:12px;font-weight:900;">비공식 추정</span>
+          </div>
+          <select id="departmentSelect" class="department-select" aria-label="지원 학과 선택">
+            <option value="ebiz">e-비즈니스과</option>
+            <option value="contents">디지털콘텐츠과</option>
+            <option value="web">웹프로그래밍과</option>
+            <option value="security">해킹방어과</option>
+          </select>
+          <div class="admission-result">
+            <div class="topline">
+              <div>
+                <div class="title" id="selectedDeptName">웹프로그래밍과</div>
+                <div class="result-text" id="admissionLevel">입력 전</div>
+              </div>
+              <span id="admissionPill" class="chance-pill chance-empty">-</span>
+            </div>
+            <div class="target-meter">
+              <div class="target-meter-track"><div id="admissionMeterFill" class="target-meter-fill"></div></div>
+              <div class="target-meter-labels"><span id="competitiveLabel">경쟁권 -</span><span id="safeLabel">안정권 -</span></div>
+            </div>
+            <div id="admissionMessage" class="admission-message">성취도와 원점수를 입력하면 학과별 안정권까지 남은 점수가 표시됩니다.</div>
+          </div>
+        </div>
       </aside>
     </section>
 
@@ -325,6 +449,15 @@
     </section>
 
     <section id="semesterGrid" class="semester-grid" aria-label="학기별 입력"></section>
+
+    <section class="panel" aria-label="학과별 안정권 분석">
+      <div class="panel-head">
+        <h2>학과별 안정권 분석</h2>
+        <span class="muted">현재 총점 기준 자동 판정</span>
+      </div>
+      <div id="chanceGrid" class="chance-grid"></div>
+      <div class="standard-note">기본 기준선은 공개된 공식 커트라인이 아니라, 디미고 일반전형 교과 120점 만점 구조를 기준으로 보수적으로 잡은 참고용 값입니다. 실제 합격 여부는 생기부, 소질·적성검사, 면접, 지원자 수준에 따라 달라집니다.</div>
+    </section>
 
     <section class="panel" aria-label="세부 계산 결과">
       <div class="panel-head">
@@ -354,6 +487,14 @@
         <div class="info-box"><strong>가중평균 처리</strong>국어·영어·수학 3과목 합에 사회·과학 2과목 합의 절반을 더한 뒤 4로 나눕니다. 원점수도 같은 방식입니다.</div>
         <div class="info-box"><strong>학기별 배점</strong>1학년 2학기 20점, 2학년 1·2학기 각 30점, 3학년 1학기 30점, 3학년 2학기 10점 구조로 총 120점 만점입니다.</div>
       </div>
+      <div class="table-wrap" style="margin-top:14px;">
+        <table class="standard-table">
+          <thead>
+            <tr><th class="left">학과</th><th>안정권</th><th>경쟁권</th><th>도전권</th><th class="left">판정 기준</th></tr>
+          </thead>
+          <tbody id="standardBody"></tbody>
+        </table>
+      </div>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -369,6 +510,37 @@
     ];
     const gradeMap = { A: 5, B: 4, C: 3, D: 2, E: 1 };
     const storeKey = "dimigo-grade-calculator-2028";
+    const deptStoreKey = "dimigo-grade-calculator-2028-department";
+    const departmentTargets = {
+      ebiz: {
+        name: "e-비즈니스과",
+        safe: 116.0,
+        competitive: 113.5,
+        challenge: 110.5,
+        note: "비즈니스·데이터·경영 계열 지원자를 고려한 기준"
+      },
+      contents: {
+        name: "디지털콘텐츠과",
+        safe: 117.0,
+        competitive: 114.5,
+        challenge: 111.5,
+        note: "콘텐츠·디자인 계열 선호도와 소수 정원을 고려한 기준"
+      },
+      web: {
+        name: "웹프로그래밍과",
+        safe: 118.0,
+        competitive: 115.5,
+        challenge: 112.5,
+        note: "개발 계열 지원 수요가 높다고 보고 보수적으로 잡은 기준"
+      },
+      security: {
+        name: "해킹방어과",
+        safe: 118.5,
+        competitive: 116.0,
+        challenge: 113.0,
+        note: "보안 계열 선호도와 고득점 지원자 유입을 고려한 기준"
+      }
+    };
     const $ = (id) => document.getElementById(id);
 
     function emptyState() {
@@ -376,6 +548,8 @@
     }
 
     let state = loadState();
+    let selectedDepartment = localStorage.getItem(deptStoreKey) || "web";
+    if (!departmentTargets[selectedDepartment]) selectedDepartment = "web";
 
     function loadState() {
       try {
@@ -517,7 +691,89 @@
         const target = $(`semesterScore-${si}`);
         if (target) target.textContent = fmt(result.semesterScore);
       });
+      renderAdmission(total, entered, complete);
       renderDetailTable(results);
+    }
+
+
+    function getAdmissionStatus(total, deptKey, entered) {
+      const target = departmentTargets[deptKey];
+      if (!entered) {
+        return { code: "empty", label: "입력 전", headline: "입력 전", gap: target.safe, message: "성취도와 원점수를 입력하면 안정권까지 남은 점수를 계산합니다." };
+      }
+      const safeGap = Math.round((target.safe - total + Number.EPSILON) * 10) / 10;
+      if (total >= target.safe) {
+        return { code: "safe", label: "안정권", headline: "안정권", gap: safeGap, message: `안정권 기준보다 ${fmt(Math.abs(safeGap), 1)}점 높습니다. 다만 일반전형은 교과점수 외 평가도 함께 반영되므로 소질·적성검사와 면접 준비는 유지해야 합니다.` };
+      }
+      if (total >= target.competitive) {
+        return { code: "competitive", label: "경쟁권", headline: "경쟁권", gap: safeGap, message: `안정권까지 ${fmt(safeGap, 1)}점 부족합니다. 1단계 경쟁은 가능하지만, 소질·적성검사·면접에서 점수를 끌어올려야 하는 구간입니다.` };
+      }
+      if (total >= target.challenge) {
+        return { code: "challenge", label: "도전권", headline: "도전권", gap: safeGap, message: `안정권까지 ${fmt(safeGap, 1)}점 부족합니다. 같은 점수라면 상대적으로 기준이 낮은 학과 또는 특별전형 준비 여부까지 같이 봐야 합니다.` };
+      }
+      return { code: "risk", label: "위험권", headline: "위험권", gap: safeGap, message: `안정권까지 ${fmt(safeGap, 1)}점 부족합니다. 남은 학기에서 A 비율과 원점수를 동시에 올리는 전략이 필요합니다.` };
+    }
+
+    function renderAdmission(total, entered, complete) {
+      const select = $("departmentSelect");
+      if (select) select.value = selectedDepartment;
+      const target = departmentTargets[selectedDepartment];
+      const status = getAdmissionStatus(total, selectedDepartment, entered);
+      $("selectedDeptName").textContent = target.name;
+      $("admissionLevel").textContent = status.headline;
+      $("admissionPill").textContent = status.label;
+      $("admissionPill").className = `chance-pill chance-${status.code}`;
+      $("competitiveLabel").textContent = `경쟁권 ${fmt(target.competitive, 1)}점`;
+      $("safeLabel").textContent = `안정권 ${fmt(target.safe, 1)}점`;
+      $("admissionMeterFill").style.width = `${Math.max(0, Math.min(100, (total / 120) * 100))}%`;
+      const prefix = complete < semesters.length && entered > 0 ? "현재 입력 기준 잠정 판정입니다. " : "";
+      $("admissionMessage").textContent = prefix + status.message;
+      renderChanceGrid(total, entered);
+      renderStandardTable();
+    }
+
+    function renderChanceGrid(total, entered) {
+      const grid = $("chanceGrid");
+      grid.innerHTML = Object.entries(departmentTargets).map(([key, target]) => {
+        const status = getAdmissionStatus(total, key, entered);
+        const gapText = !entered
+          ? "입력 후 표시"
+          : status.gap <= 0
+            ? `안정권 +${fmt(Math.abs(status.gap), 1)}점`
+            : `안정권까지 ${fmt(status.gap, 1)}점`;
+        return `
+          <article class="chance-card ${status.code} ${key === selectedDepartment ? "selected" : ""}" data-dept="${key}">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+              <div class="dept">${target.name}</div>
+              <span class="chance-pill chance-${status.code}">${status.label}</span>
+            </div>
+            <div class="gap">${gapText}</div>
+            <div class="target">안정권 ${fmt(target.safe, 1)}점 · 경쟁권 ${fmt(target.competitive, 1)}점 · 도전권 ${fmt(target.challenge, 1)}점</div>
+          </article>
+        `;
+      }).join("");
+      grid.querySelectorAll(".chance-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          selectedDepartment = card.dataset.dept;
+          localStorage.setItem(deptStoreKey, selectedDepartment);
+          renderAdmission(total, entered, semesters.map((_, si) => calculateRow(si)).filter((r) => r.allReady).length);
+          showToast(`${departmentTargets[selectedDepartment].name} 기준으로 변경`);
+        });
+      });
+    }
+
+    function renderStandardTable() {
+      const body = $("standardBody");
+      if (!body) return;
+      body.innerHTML = Object.values(departmentTargets).map((target) => `
+        <tr>
+          <td class="left"><strong>${target.name}</strong></td>
+          <td><span class="chip good">${fmt(target.safe, 1)}+</span></td>
+          <td><span class="chip">${fmt(target.competitive, 1)}+</span></td>
+          <td><span class="chip warn">${fmt(target.challenge, 1)}+</span></td>
+          <td class="left">${target.note}</td>
+        </tr>
+      `).join("");
     }
 
     function renderDetailTable(results) {
@@ -588,6 +844,12 @@
     $("sampleBtn").addEventListener("click", fillSample);
     $("csvBtn").addEventListener("click", downloadCsv);
     $("printBtn").addEventListener("click", () => window.print());
+    $("departmentSelect").addEventListener("change", (event) => {
+      selectedDepartment = event.target.value;
+      localStorage.setItem(deptStoreKey, selectedDepartment);
+      updateAll();
+      showToast(`${departmentTargets[selectedDepartment].name} 기준으로 변경`);
+    });
 
     renderInputs();
     updateAll();
