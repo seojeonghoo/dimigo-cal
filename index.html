@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2028학년도 내신 교과 점수 계산기</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --surface: rgba(255,255,255,.92);
+      --surface-strong: #ffffff;
+      --text: #151a24;
+      --muted: #697386;
+      --line: #e4e9f2;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-soft: #eaf1ff;
+      --green: #16a34a;
+      --green-soft: #eaf8ef;
+      --amber: #f59e0b;
+      --amber-soft: #fff7e6;
+      --red: #ef4444;
+      --red-soft: #fff1f2;
+      --shadow: 0 20px 50px rgba(30, 41, 59, .10);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --input: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(37, 99, 235, .18), transparent 28rem),
+        radial-gradient(circle at 90% 10%, rgba(34, 197, 94, .12), transparent 25rem),
+        linear-gradient(180deg, #fbfdff 0%, var(--bg) 50%, #eef3fb 100%);
+    }
+    button, input, select { font: inherit; }
+    .app {
+      width: min(1220px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 56px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(300px, .8fr);
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+    .hero-main, .summary-card, .panel, .semester-card {
+      background: var(--surface);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(226, 232, 240, .9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .hero-main { padding: 28px; position: relative; overflow: hidden; }
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -110px;
+      width: 260px;
+      height: 260px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, .16), rgba(22, 163, 74, .10));
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 46px); line-height: 1.12; letter-spacing: -0.05em; }
+    .subtitle { margin: 14px 0 0; color: var(--muted); line-height: 1.65; font-size: 15.5px; max-width: 760px; }
+    .formula-line {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: #334155;
+      font-size: 13px;
+    }
+    .formula-line span {
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+    .summary-card { padding: 22px; display: grid; gap: 14px; }
+    .score-big {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 72%);
+      border: 1px solid #dbeafe;
+    }
+    .score-big .label { color: var(--muted); font-size: 13px; font-weight: 800; }
+    .score-big .value { font-size: 38px; font-weight: 900; letter-spacing: -0.04em; }
+    .score-big .value small { color: var(--muted); font-size: 18px; font-weight: 800; }
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+    .metric .k { color: var(--muted); font-size: 12.5px; font-weight: 800; }
+    .metric .v { margin-top: 7px; font-size: 20px; font-weight: 900; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .status-empty { color: #64748b; background: #f1f5f9; }
+    .status-partial { color: #a16207; background: var(--amber-soft); }
+    .status-complete { color: #15803d; background: var(--green-soft); }
+    .progress-wrap { display: grid; gap: 9px; }
+    .progress-text { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; font-weight: 800; }
+    .progress-bar { height: 12px; overflow: hidden; border-radius: 999px; background: #edf2f7; border: 1px solid #e2e8f0; }
+    .progress-fill { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), #22c55e); transition: width .25s ease; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 22px 0;
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.74);
+      border: 1px solid var(--line);
+    }
+    .button-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-weight: 900;
+      color: #fff;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(37,99,235,.20);
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(37,99,235,.24); background: var(--primary-dark); }
+    .btn.secondary { color: #1e293b; background: #fff; border: 1px solid var(--line); box-shadow: none; }
+    .btn.secondary:hover { background: #f8fafc; box-shadow: none; }
+    .btn.danger { color: #991b1b; background: var(--red-soft); border: 1px solid #fecdd3; box-shadow: none; }
+    .btn.danger:hover { background: #ffe4e6; box-shadow: none; }
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .semester-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .semester-card { padding: 18px; }
+    .semester-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .semester-title { display: grid; gap: 4px; }
+    .semester-title strong { font-size: 18px; letter-spacing: -0.02em; }
+    .semester-title span { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+    .semester-score {
+      min-width: 98px;
+      padding: 10px 12px;
+      text-align: right;
+      border-radius: 15px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+    }
+    .semester-score .n { font-size: 23px; font-weight: 950; letter-spacing: -0.03em; }
+    .semester-score .t { color: var(--muted); font-size: 11.5px; font-weight: 800; }
+    .subject-grid { display: grid; gap: 10px; }
+    .subject-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 9px;
+      border-radius: 15px;
+      background: #fbfdff;
+      border: 1px solid #eef2f7;
+    }
+    .subject-name { font-size: 14px; font-weight: 900; color: #334155; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: var(--muted); font-size: 11.5px; font-weight: 800; }
+    select, input[type="number"] {
+      width: 100%;
+      height: 42px;
+      padding: 0 11px;
+      border: 1px solid #d9e2ef;
+      border-radius: 13px;
+      background: var(--input);
+      color: var(--text);
+      outline: none;
+      transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+    select:focus, input[type="number"]:focus { border-color: rgba(37,99,235,.75); box-shadow: 0 0 0 4px rgba(37,99,235,.10); background: #fff; }
+    input.invalid { border-color: var(--red); background: #fff7f8; }
+    .panel { margin-top: 18px; padding: 20px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .panel h2 { margin: 0; font-size: 20px; letter-spacing: -0.03em; }
+    .table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+    table { width: 100%; border-collapse: collapse; min-width: 1180px; }
+    th, td { padding: 10px 11px; border-bottom: 1px solid var(--line); text-align: center; font-size: 13px; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 1; background: #f8fafc; color: #475569; font-weight: 900; }
+    tbody tr:hover td { background: #fbfdff; }
+    td.left, th.left { text-align: left; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      height: 28px;
+      padding: 0 9px;
+      border-radius: 999px;
+      font-weight: 900;
+      background: #f1f5f9;
+      color: #334155;
+    }
+    .chip.good { background: var(--green-soft); color: #15803d; }
+    .chip.warn { background: var(--amber-soft); color: #a16207; }
+    .muted { color: var(--muted); }
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .info-box { padding: 16px; border-radius: 18px; background: #fff; border: 1px solid var(--line); line-height: 1.65; color: #334155; font-size: 14px; }
+    .info-box strong { display: block; margin-bottom: 8px; color: #111827; font-size: 15px; }
+    .footer-note { margin-top: 16px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 20px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: #0f172a;
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 14px 40px rgba(15,23,42,.25);
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 20;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (max-width: 920px) {
+      .hero { grid-template-columns: 1fr; }
+      .semester-grid { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .app { width: min(100% - 20px, 1220px); padding-top: 18px; }
+      .hero-main, .summary-card, .semester-card, .panel { border-radius: 18px; padding: 16px; }
+      .subject-row { grid-template-columns: 1fr; }
+      .toolbar { align-items: stretch; }
+      .button-row { width: 100%; }
+      .btn { flex: 1; }
+      .score-big .value { font-size: 32px; }
+      .metric-grid { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; }
+      .app { width: 100%; padding: 0; }
+      .toolbar, .toast { display: none !important; }
+      .hero, .semester-grid, .info-grid { display: block; }
+      .hero-main, .summary-card, .panel, .semester-card { box-shadow: none; break-inside: avoid; margin-bottom: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero" aria-label="계산기 요약">
+      <div class="hero-main">
+        <div class="eyebrow">2028학년도 기준 · 국어/영어/수학/사회/과학</div>
+        <h1>내신 교과 점수 계산기</h1>
+        <p class="subtitle">첨부된 엑셀 파일의 계산 구조를 웹으로 옮긴 버전입니다. 파란색 입력 영역 역할을 하는 성취도와 원점수만 입력하면 성취도 환산, 가중평균, 학기별 점수, 최종 교과 총점을 자동 계산합니다.</p>
+        <div class="formula-line" aria-label="핵심 공식">
+          <span>사과 = 사회 + 과학</span>
+          <span>가중평균 = (국영수 합 + 사과 합 ÷ 2) ÷ 4</span>
+          <span>A=5 · B=4 · C=3 · D=2 · E=1</span>
+          <span>학기 점수 = 소수 셋째 자리 반올림</span>
+        </div>
+      </div>
+      <aside class="summary-card">
+        <div class="score-big">
+          <div>
+            <div class="label">최종 교과 총점</div>
+            <div class="value"><span id="totalScore">0</span><small> / 120</small></div>
+          </div>
+          <span id="globalStatus" class="status-pill status-empty">입력 전</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-text"><span>입력 진행률</span><span id="progressText">0 / 50칸</span></div>
+          <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+        </div>
+        <div class="metric-grid">
+          <div class="metric"><div class="k">총 만점</div><div class="v">120점</div></div>
+          <div class="metric"><div class="k">완료 학기</div><div class="v"><span id="completeSemesters">0</span> / 5</div></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="toolbar" aria-label="도구 모음">
+      <div class="hint">값은 이 브라우저에 자동 저장됩니다. 원점수는 0~100 사이만 입력 가능합니다.</div>
+      <div class="button-row">
+        <button class="btn secondary" id="sampleBtn" type="button">예시 입력</button>
+        <button class="btn secondary" id="csvBtn" type="button">CSV 저장</button>
+        <button class="btn secondary" id="printBtn" type="button">인쇄/PDF</button>
+        <button class="btn danger" id="resetBtn" type="button">초기화</button>
+      </div>
+    </section>
+
+    <section id="semesterGrid" class="semester-grid" aria-label="학기별 입력"></section>
+
+    <section class="panel" aria-label="세부 계산 결과">
+      <div class="panel-head">
+        <h2>세부 계산 결과</h2>
+        <span class="muted">엑셀 계산 열과 동일한 구조</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="left">학년</th><th>학기</th>
+              <th>국어 환산</th><th>영어 환산</th><th>수학 환산</th><th>사회 환산</th><th>과학 환산</th>
+              <th>국영수 성취도합</th><th>사과 성취도합</th><th>국영수 원점수합</th><th>사과 원점수합</th>
+              <th>가중 성취도평균</th><th>가중 원점수평균</th><th>학기 점수</th>
+            </tr>
+          </thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+      <p class="footer-note">사회 과목이 없는 학기에는 역사 과목으로 대체해 입력하면 됩니다.</p>
+    </section>
+
+    <section class="panel" aria-label="계산 기준">
+      <div class="panel-head"><h2>계산 기준</h2></div>
+      <div class="info-grid">
+        <div class="info-box"><strong>성취도 환산</strong>A=5, B=4, C=3, D=2, E=1로 변환합니다. 성취도가 비어 있으면 해당 학기의 계산 결과는 표시하지 않습니다.</div>
+        <div class="info-box"><strong>가중평균 처리</strong>국어·영어·수학 3과목 합에 사회·과학 2과목 합의 절반을 더한 뒤 4로 나눕니다. 원점수도 같은 방식입니다.</div>
+        <div class="info-box"><strong>학기별 배점</strong>1학년 2학기 20점, 2학년 1·2학기 각 30점, 3학년 1학기 30점, 3학년 2학기 10점 구조로 총 120점 만점입니다.</div>
+      </div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const subjects = ["국어", "영어", "수학", "사회", "과학"];
+    const semesters = [
+      { grade: "1학년", term: "2학기", base: 10, achCoef: 1, rawCoef: 0.05, max: 20 },
+      { grade: "2학년", term: "1학기", base: 16, achCoef: 1.4, rawCoef: 0.07, max: 30 },
+      { grade: "2학년", term: "2학기", base: 16, achCoef: 1.4, rawCoef: 0.07, max: 30 },
+      { grade: "3학년", term: "1학기", base: 16, achCoef: 1.4, rawCoef: 0.07, max: 30 },
+      { grade: "3학년", term: "2학기", base: 6, achCoef: 0.4, rawCoef: 0.02, max: 10 }
+    ];
+    const gradeMap = { A: 5, B: 4, C: 3, D: 2, E: 1 };
+    const storeKey = "dimigo-grade-calculator-2028";
+    const $ = (id) => document.getElementById(id);
+
+    function emptyState() {
+      return semesters.map(() => ({ grades: subjects.map(() => ""), raws: subjects.map(() => "") }));
+    }
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storeKey) || "null");
+        if (!Array.isArray(saved) || saved.length !== semesters.length) return emptyState();
+        return saved.map((row) => ({
+          grades: subjects.map((_, i) => ["", "A", "B", "C", "D", "E"].includes(row?.grades?.[i]) ? row.grades[i] : ""),
+          raws: subjects.map((_, i) => normalizeRaw(row?.raws?.[i]))
+        }));
+      } catch {
+        return emptyState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(storeKey, JSON.stringify(state));
+    }
+
+    function normalizeRaw(value) {
+      if (value === null || value === undefined || value === "") return "";
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "";
+      return String(Math.max(0, Math.min(100, n)));
+    }
+
+    function fmt(value, digits = 3) {
+      if (value === "" || value === null || value === undefined || Number.isNaN(value)) return "-";
+      const rounded = Math.round((Number(value) + Number.EPSILON) * 1000) / 1000;
+      return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(digits).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function renderInputs() {
+      const grid = $("semesterGrid");
+      grid.innerHTML = semesters.map((semester, si) => `
+        <article class="semester-card" data-semester="${si}">
+          <div class="semester-head">
+            <div class="semester-title">
+              <strong>${semester.grade} ${semester.term}</strong>
+              <span>기준 ${semester.base} + 성취도×${semester.achCoef} + 원점수×${semester.rawCoef}</span>
+            </div>
+            <div class="semester-score">
+              <div class="n" id="semesterScore-${si}">-</div>
+              <div class="t">/${semester.max}점</div>
+            </div>
+          </div>
+          <div class="subject-grid">
+            ${subjects.map((subject, sj) => `
+              <div class="subject-row">
+                <div class="subject-name">${subject}</div>
+                <div class="field">
+                  <label for="g-${si}-${sj}">성취도</label>
+                  <select id="g-${si}-${sj}" data-type="grade" data-si="${si}" data-sj="${sj}" aria-label="${semester.grade} ${semester.term} ${subject} 성취도">
+                    <option value="">선택</option>
+                    <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="r-${si}-${sj}">원점수</label>
+                  <input id="r-${si}-${sj}" data-type="raw" data-si="${si}" data-sj="${sj}" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="0~100" aria-label="${semester.grade} ${semester.term} ${subject} 원점수" />
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </article>
+      `).join("");
+
+      grid.querySelectorAll("select, input").forEach((el) => {
+        const si = Number(el.dataset.si);
+        const sj = Number(el.dataset.sj);
+        if (el.dataset.type === "grade") el.value = state[si].grades[sj];
+        if (el.dataset.type === "raw") el.value = state[si].raws[sj];
+        el.addEventListener("input", handleInput);
+        el.addEventListener("change", handleInput);
+      });
+    }
+
+    function handleInput(event) {
+      const el = event.currentTarget;
+      const si = Number(el.dataset.si);
+      const sj = Number(el.dataset.sj);
+      if (el.dataset.type === "grade") {
+        state[si].grades[sj] = el.value;
+      } else {
+        const value = el.value;
+        const n = Number(value);
+        const valid = value === "" || (Number.isFinite(n) && n >= 0 && n <= 100);
+        el.classList.toggle("invalid", !valid);
+        if (valid) state[si].raws[sj] = value;
+      }
+      saveState();
+      updateAll();
+    }
+
+    function calculateRow(si) {
+      const row = state[si];
+      const semester = semesters[si];
+      const converted = row.grades.map((g) => g ? gradeMap[g] : "");
+      const rawNums = row.raws.map((r) => r === "" ? "" : Number(r));
+      const coreAchReady = converted.slice(0, 3).every((v) => v !== "");
+      const societyScienceAchReady = converted.slice(3, 5).every((v) => v !== "");
+      const coreRawReady = rawNums.slice(0, 3).every((v) => v !== "" && Number.isFinite(v));
+      const societyScienceRawReady = rawNums.slice(3, 5).every((v) => v !== "" && Number.isFinite(v));
+      const allReady = row.grades.every(Boolean) && rawNums.every((v) => v !== "" && Number.isFinite(v));
+      const coreAchSum = coreAchReady ? converted[0] + converted[1] + converted[2] : "";
+      const societyScienceAchSum = societyScienceAchReady ? converted[3] + converted[4] : "";
+      const coreRawSum = coreRawReady ? rawNums[0] + rawNums[1] + rawNums[2] : "";
+      const societyScienceRawSum = societyScienceRawReady ? rawNums[3] + rawNums[4] : "";
+      const weightedAchAvg = coreAchReady && societyScienceAchReady ? (coreAchSum + societyScienceAchSum / 2) / 4 : "";
+      const weightedRawAvg = coreRawReady && societyScienceRawReady ? (coreRawSum + societyScienceRawSum / 2) / 4 : "";
+      const semesterScore = allReady ? Math.round((semester.base + weightedAchAvg * semester.achCoef + weightedRawAvg * semester.rawCoef + Number.EPSILON) * 1000) / 1000 : "";
+      return { converted, coreAchSum, societyScienceAchSum, coreRawSum, societyScienceRawSum, weightedAchAvg, weightedRawAvg, semesterScore, allReady };
+    }
+
+    function updateAll() {
+      const results = semesters.map((_, si) => calculateRow(si));
+      const total = Math.round((results.reduce((sum, r) => sum + (r.semesterScore === "" ? 0 : r.semesterScore), 0) + Number.EPSILON) * 1000) / 1000;
+      const entered = state.reduce((sum, row) => sum + row.grades.filter(Boolean).length + row.raws.filter((v) => v !== "").length, 0);
+      const complete = results.filter((r) => r.allReady).length;
+
+      $("totalScore").textContent = fmt(total);
+      $("completeSemesters").textContent = complete;
+      $("progressText").textContent = `${entered} / 50칸`;
+      $("progressFill").style.width = `${Math.round((entered / 50) * 100)}%`;
+
+      const status = $("globalStatus");
+      status.className = "status-pill";
+      if (entered === 0) {
+        status.textContent = "입력 전";
+        status.classList.add("status-empty");
+      } else if (entered === 50) {
+        status.textContent = "전체 학기 입력 완료";
+        status.classList.add("status-complete");
+      } else {
+        status.textContent = "일부 학기만 입력됨";
+        status.classList.add("status-partial");
+      }
+
+      results.forEach((result, si) => {
+        const target = $(`semesterScore-${si}`);
+        if (target) target.textContent = fmt(result.semesterScore);
+      });
+      renderDetailTable(results);
+    }
+
+    function renderDetailTable(results) {
+      $("detailBody").innerHTML = results.map((r, si) => `
+        <tr>
+          <td class="left">${semesters[si].grade}</td>
+          <td>${semesters[si].term}</td>
+          ${r.converted.map((v) => `<td>${v === "" ? "-" : `<span class="chip">${v}</span>`}</td>`).join("")}
+          <td>${fmt(r.coreAchSum)}</td>
+          <td>${fmt(r.societyScienceAchSum)}</td>
+          <td>${fmt(r.coreRawSum)}</td>
+          <td>${fmt(r.societyScienceRawSum)}</td>
+          <td>${fmt(r.weightedAchAvg)}</td>
+          <td>${fmt(r.weightedRawAvg)}</td>
+          <td><span class="chip ${r.allReady ? "good" : "warn"}">${fmt(r.semesterScore)}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    function showToast(message) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1700);
+    }
+
+    function resetAll() {
+      state = emptyState();
+      saveState();
+      renderInputs();
+      updateAll();
+      showToast("초기화 완료");
+    }
+
+    function fillSample() {
+      state = semesters.map((_, si) => ({
+        grades: si < 2 ? ["A", "A", "B", "A", "B"] : si < 4 ? ["A", "B", "A", "B", "A"] : ["B", "A", "A", "B", "B"],
+        raws: si < 2 ? ["95", "92", "88", "93", "90"] : si < 4 ? ["91", "89", "94", "87", "92"] : ["88", "93", "91", "86", "89"]
+      }));
+      saveState();
+      renderInputs();
+      updateAll();
+      showToast("예시 값이 입력되었습니다");
+    }
+
+    function downloadCsv() {
+      const rows = [["학년", "학기", ...subjects.map((s) => `${s} 성취도`), ...subjects.map((s) => `${s} 원점수`), "가중 성취도평균", "가중 원점수평균", "학기 점수"]];
+      semesters.forEach((sem, si) => {
+        const result = calculateRow(si);
+        rows.push([sem.grade, sem.term, ...state[si].grades, ...state[si].raws, fmt(result.weightedAchAvg), fmt(result.weightedRawAvg), fmt(result.semesterScore)]);
+      });
+      rows.push(["최종 교과 총점", "", "", "", "", "", "", "", "", "", "", "", "", "", fmt(semesters.map((_, si) => calculateRow(si)).reduce((sum, r) => sum + (r.semesterScore === "" ? 0 : r.semesterScore), 0))]);
+      const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "내신_교과_점수_계산결과.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast("CSV 저장 완료");
+    }
+
+    $("resetBtn").addEventListener("click", resetAll);
+    $("sampleBtn").addEventListener("click", fillSample);
+    $("csvBtn").addEventListener("click", downloadCsv);
+    $("printBtn").addEventListener("click", () => window.print());
+
+    renderInputs();
+    updateAll();
+  </script>
+</body>
+</html>
